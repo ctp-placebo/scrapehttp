@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css" type="text/css">
+    <title>Web Scraper</title>
+</head>
+<body>
+    <h1>Web Scraper</h1>
+    <form id="scrape-form">
+        <div>
+            <label for="url">URL:</label>
+            <input type="text" id="url" name="url" required>
+        </div>
+        <div>
+            <label for="depth">Depth:</label>
+            <input type="number" id="depth" name="depth" min="0" required>
+        </div>
+        <div>
+            <label for="search-string">Search String:</label>
+            <input type="text" id="search-string" name="searchString" required>
+        </div>
+        <button type="button" id="scrape-button">Start Scrape</button>
+    </form>
+    <div id="loading" style="display: none;">
+        <img src="/static/loading.gif" alt="Loading...">
+    </div>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('scrape-button').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('scrape-form'));
+            document.getElementById('loading').style.display = 'block';
+            fetch('/scrape', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = `
+                    <h2>Scraped Links</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Source URL</th>
+                                <th>Link Text</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.links.map(link => `
+                                <tr>
+                                    <td><a href="${link.source_url}">${link.source_url}</a></td>
+                                    <td><a href="${link.url}">${link.text}</a></td>
+                                    <td></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

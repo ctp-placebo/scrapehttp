@@ -1,0 +1,88 @@
+#scrape-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 40%;
+    max-width: 500px;
+    background-color: lightpink;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+#user-form div {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+#user-form label {
+    margin-bottom: 0.5rem;
+}
+
+#user-form input {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 40%;
+}
+
+form div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+form label {
+    flex: 1;
+    margin-right: 0.5rem;
+}
+
+form input {
+    flex: 2;
+    padding: 0.5rem;
+}
+
+html {
+    font-size: 16px;
+    /* background-color: lightcoral; */
+}
+
+button {
+    padding: 0.5rem;
+    background-color: lightblue;
+    border: 1px solid blueviolet;
+    border-radius: 8px;
+    cursor: pointer;
+    width: fit-content;
+}
+
+#scrape-button {
+    align-self: flex-end;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th {
+    text-align: left;
+    padding: 0.5rem;
+    border-bottom: 3px solid black;
+}
+
+td {
+    padding: 0.5rem;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
