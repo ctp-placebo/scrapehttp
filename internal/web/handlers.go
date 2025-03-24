@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,6 +12,7 @@ import (
 	"scrapehttp/internal/scraper"
 )
 
+// RenderTemplate function is declared in templates.go
 type PageData struct {
 	Links []LinkData `json:"links"`
 }
@@ -21,13 +21,13 @@ type LinkData struct {
 	URL       string `json:"url"`
 	Text      string `json:"text"`
 	SourceURL string `json:"source_url"`
+	Depth     int    `json:"depth"`
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.html"))
-	err := tmpl.Execute(w, nil)
+	err := RenderTemplate(w, "index.html", nil)
 	if err != nil {
-		fmt.Printf("Error executing template: %v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -50,8 +50,8 @@ func ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	httpLinks := scraper.ScrapeLinks(baseURL, searchString, maxDepth)
 
 	links := make([]LinkData, 0, len(httpLinks))
-	for link, source := range httpLinks {
-		links = append(links, LinkData{URL: link, Text: link, SourceURL: fmt.Sprintf("%v", source)})
+	for link, data := range httpLinks {
+		links = append(links, LinkData{URL: link, Text: link, SourceURL: data.SourceURL, Depth: data.Depth})
 	}
 
 	// Return the links as a JSON response

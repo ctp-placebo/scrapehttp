@@ -9,9 +9,14 @@ import (
 	"golang.org/x/net/html"
 )
 
-func ScrapeLinks(baseURL, searchString string, maxDepth int) map[string]string {
-	visited := make(map[string]bool)     // To track visited URLs
-	httpLinks := make(map[string]string) // To store links that match the search string
+type LinkInfo struct {
+	SourceURL string
+	Depth     int
+}
+
+func ScrapeLinks(baseURL, searchString string, maxDepth int) map[string]LinkInfo {
+	visited := make(map[string]bool)       // To track visited URLs
+	httpLinks := make(map[string]LinkInfo) // To store links that match the search string
 
 	var getLinks func(string, int)
 	getLinks = func(currentURL string, depth int) {
@@ -44,15 +49,29 @@ func ScrapeLinks(baseURL, searchString string, maxDepth int) map[string]string {
 				for _, attr := range n.Attr {
 					if attr.Key == "href" {
 						href := attr.Val
-						absoluteURL := resolveURL(href, baseURL)
 
-						if strings.Contains(href, searchString) {
-							httpLinks[href] = currentURL
+						// Skip unwanted links
+						if strings.HasPrefix(href, "mailto:") || strings.HasPrefix(href, "tel:") || strings.HasPrefix(href, "javascript:") {
+							fmt.Printf("Skipping unwanted link: %s\n", href)
+							continue
 						}
 
+						absoluteURL := resolveURL(href, baseURL)
+
+						// Skip external links
 						baseParsed, err := url.Parse(baseURL)
 						linkParsed, err2 := url.Parse(absoluteURL)
-						if err == nil && err2 == nil && baseParsed.Host == linkParsed.Host {
+						if err == nil && err2 == nil && baseParsed.Host != linkParsed.Host {
+							fmt.Printf("Skipping external link: %s\n", absoluteURL)
+							continue
+						}
+
+						if strings.Contains(href, searchString) {
+							fmt.Printf("Found matching link: %s (source: %s)\n", href, currentURL)
+							httpLinks[href] = LinkInfo{SourceURL: currentURL, Depth: depth}
+						}
+
+						if baseParsed.Host == linkParsed.Host {
 							getLinks(absoluteURL, depth+1)
 						}
 					}

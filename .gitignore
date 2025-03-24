@@ -1,0 +1,32 @@
+# Ignore the results_log folder and its contents
+results_log/
+
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Output of the go coverage tool
+*.out
+
+# Temporary files
+*.tmp
+
+# Dependency directories
+vendor/
+
+# IDE/editor specific files
+.vscode/
+.idea/
+
+# Go build artifacts
+*.o
+*.a
+*.log
+
+# Go workspace file
+go.work
+
+# Go modules
+go.sum
