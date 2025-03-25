@@ -10,7 +10,13 @@ body {
 }
 
 header {
-    border-bottom: #e1c4ff 3px solid;
+    border-bottom: #e1c4ff 2px solid;
+    h1 {
+        color: #e1c4ff;
+        text-align: center;
+        padding: 1rem;
+        margin: 0;
+    }
 }
 
 header nav {
@@ -43,11 +49,11 @@ section, header, footer {
 
 section#page-content {
     display: flex;
+    flex-flow: wrap-reverse;
     justify-content: center;
     padding-bottom: 3rem;
-    justify-items: center;
     gap: 10%;
-    margin-top: 2em;
+    margin: 2em;
 }
 
 article#user-form {
@@ -57,37 +63,38 @@ article#user-form {
     padding: 2rem;
     background-color: lightpink;
     margin-right: 1rem;
+    min-height: 16em;
 }
 
 article#instructions {
     flex: 1;
     padding: 2rem;
-    background-color: #f2f2f2;
-    margin-left: 1rem;
+    background-color: silver;;
+    color: #3f0000;
+    min-height: 16em;
 }
 
 #user-form, #instructions {
     border-radius: 20px;
     height: fit-content;
-    max-width: 20vw;;
+    margin-bottom: 1em;
 }
 
 #scrape-form {
     display: flex;
     flex-direction: column;
-    max-width: 500px;
     color: #3f0000;
 }
 
 #scrape-form div {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     margin-bottom: 1rem;
 }
 
 #scrape-form label {
     margin-bottom: 0.5rem;
-    min-width: 9rem;
+    /* min-width: 9rem; */
 }
 
 #scrape-form input {
@@ -96,7 +103,7 @@ article#instructions {
 }
 
 button {
-    padding: 0.5rem;
+    padding: 0.75rem;
     background-color: lightblue;
     border: 1px solid blueviolet;
     border-radius: 8px;
@@ -104,6 +111,7 @@ button {
     width: fit-content;
     font-weight: bold;
     text-transform: uppercase;
+    box-shadow: 3px 2px 2px deeppink;
 }
 
 #scrape-button {
