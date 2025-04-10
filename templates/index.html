@@ -19,9 +19,20 @@
                     <label for="depth">Depth:</label>
                     <input type="number" id="depth" name="depth" min="0" required>
                 </div>
-                <div>
+                <div id="search-type">
+                    <label for="search-type">Search Type:</label>
+                    <div class="search-type-radio">
+                        <input type="radio" id="search-string" name="searchType" value="string" checked>
+                        <label for="search-string">Search for text (String)</label>
+                    </div>
+                    <div class="search-type-radio">
+                        <input type="radio" id="check-dead-links" name="searchType" value="deadlinks">
+                        <label for="check-dead-links">Check for dead links</label>
+                    </div>
+                </div>
+                <div id="search-string-input">
                     <label for="search-string">Search String:</label>
-                    <input type="text" id="search-string" name="searchString" required>
+                    <input type="text" id="search-string-input-field" name="searchString">
                 </div>
                 <button type="button" id="scrape-button">Start</button>
             </form>
@@ -31,7 +42,8 @@
             <ul>
                 <li>Enter the URL you want to scrape.</li>
                 <li>Specify the depth of the scrape.</li>
-                <li>Enter the search string you are looking for.</li>
+                <li>Select the search type: Search for String or Check for Dead Links.</li>
+                <li>If searching for a string, enter the search string.</li>
                 <li>Click the "Start" button to begin scraping.</li>
             </ul>
         </article>
@@ -69,7 +81,7 @@
                             ${data.links.map(link => `
                                 <tr>
                                     <td><a href="${link.source_url}">${link.source_url}</a></td>
-                                    <td><a href="${link.url}">${link.text}</a></td>
+                                    <td>${link.url}<br>${link.text}</td>
                                     <td>${link.depth}</td>
                                 </tr>
                             `).join('')}
@@ -81,6 +93,27 @@
                 document.getElementById('loading').style.display = 'none';
                 console.error('Error:', error);
             });
+        });
+
+        // Show or hide the search string input based on the selected search type
+        document.querySelectorAll('input[name="searchType"]').forEach((elem) => {
+            elem.addEventListener('change', function(event) {
+                const searchStringInput = document.getElementById('search-string-input');
+                const searchStringInputField = document.getElementById('search-string-input-field');
+                if (event.target.value === 'string') {
+                    searchStringInputField.disabled = false;
+                } else {
+                    searchStringInputField.disabled = true;
+                }
+            });
+        });
+
+        // Initialize the state of the search string input
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchStringInputField = document.getElementById('search-string-input-field');
+            if (document.getElementById('check-dead-links').checked) {
+                searchStringInputField.disabled = true;
+            }
         });
     </script>
 </body>

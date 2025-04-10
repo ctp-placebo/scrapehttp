@@ -102,6 +102,24 @@ article#instructions {
     padding: 0.5rem;
 }
 
+#search-type {
+    label {
+        margin-left: 1rem;
+        margin-top: -4px;
+    }
+    .search-type-radio {
+        display: flex;
+        flex-direction: row;
+        justify-content: normal;
+        align-items: center;
+        padding-left: 1em;
+    }
+    >label:first-of-type {
+        font-size: x-large;
+        text-transform: uppercase;;
+    }
+}
+
 button {
     padding: 0.75rem;
     background-color: lightblue;

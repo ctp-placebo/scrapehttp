@@ -45,13 +45,22 @@ func ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	searchType := r.FormValue("searchType")
 	searchString := r.FormValue("searchString")
 
-	httpLinks := scraper.ScrapeLinks(baseURL, searchString, maxDepth)
-
-	links := make([]LinkData, 0, len(httpLinks))
-	for link, data := range httpLinks {
-		links = append(links, LinkData{URL: link, Text: link, SourceURL: data.SourceURL, Depth: data.Depth})
+	var links []LinkData
+	if searchType == "deadlinks" {
+		scraperLinks := scraper.CheckDeadLinks(baseURL, maxDepth)
+		links = make([]LinkData, len(scraperLinks))
+		for i, link := range scraperLinks {
+			links[i] = LinkData{URL: link.URL, Text: link.Text, SourceURL: link.SourceURL, Depth: link.Depth}
+		}
+	} else {
+		httpLinks := scraper.ScrapeLinks(baseURL, searchString, maxDepth)
+		links = make([]LinkData, 0, len(httpLinks))
+		for link, data := range httpLinks {
+			links = append(links, LinkData{URL: link, Text: link, SourceURL: data.SourceURL, Depth: data.Depth})
+		}
 	}
 
 	// Return the links as a JSON response

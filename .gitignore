@@ -1,5 +1,7 @@
 # Ignore the results_log folder and its contents
 results_log/
+tmp/
+tmp/build-errors.log
 
 # Binaries for programs and plugins
 *.exe
@@ -30,3 +32,4 @@ go.work
 
 # Go modules
 go.sum
+tmp/build-errors.log
