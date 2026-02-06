@@ -72,5 +72,5 @@ func TestScrapeLinks(t *testing.T) {
 			t.Log(link)
 		}
 	}
-	getLinks(baseURL, 0) // 2nd argument is the depth of the current URL
+	getLinks(baseURL, 0) // 2nd argument is the depth for the current URL
 }

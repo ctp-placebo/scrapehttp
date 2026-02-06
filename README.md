@@ -1,60 +1,82 @@
 # ScrapeHTTP
 
-ScrapeHTTP is a web scraper application built with Go. It allows users to scrape links from a specified URL up to a certain depth and search for specific strings within the links.
+A web-based link scraper built with Go that crawls websites to find links containing specific search strings. The application provides a simple web interface to configure scraping parameters and displays results in a tabular format.
+
+## Features
+
+- **Recursive Link Crawling**: Scrape links up to a specified depth
+- **Search Filtering**: Find links containing specific search strings
+- **Web Interface**: User-friendly form-based interface with live results
+- **Result Logging**: Automatically saves results to timestamped files
+- **Smart Filtering**: Skips external links, mailto, tel, and javascript links
+- **Result Management**: Maintains only the 5 most recent result files
 
 ## Prerequisites
 
 - Go 1.24.1 or later
-- Git
 
 ## Installation
 
 1. **Clone the repository**:
 
    ```sh
-   git clone https://github.com/yourusername/scrapehttp.git
+   git clone https://github.com/ctp-placebo/scrapehttp.git
    cd scrapehttp
    ```
 
 2. **Install dependencies**:
 
    ```sh
-   go mod tidy
+   go mod download
    ```
 
-3. **Install `air` for live reloading**:
+## Running the Application
 
-   ```sh
-   go install github.com/cosmtrek/air@v1.27.3
-   ```
+### Standard Run
 
-   Ensure that your Go binaries directory is in your PATH. Add the following line to your shell profile file (`~/.bashrc`, `~/.zshrc`, etc.):
+From the project root directory, run:
 
-   ```sh
-   export PATH=$PATH:$(go env GOPATH)/bin
-   ```
+```sh
+go run cmd/scrapehttp/main.go
+```
 
-   Reload your shell profile:
+The server will start on `http://localhost:8080`.
 
-   ```sh
-   source ~/.bashrc  # or ~/.zshrc, depending on your shell
-   ```
+### Build and Run
 
-## Running the Development Server
+To build a binary:
 
-1. **Ensure you are in the project root directory**:
+```sh
+go build -o scrapehttp cmd/scrapehttp/main.go
+./scrapehttp
+```
 
-   ```sh
-   cd /path/to/scrapehttp
-   ```
+### Development with Live Reload (Optional)
 
-2. **Run the development server with `air`**:
+For development with automatic reloading, install and use `air`:
 
-   ```sh
-   air
-   ```
+```sh
+go install github.com/air-verse/air@latest
+air
+```
 
-   This will start the server and watch for changes, automatically rebuilding and restarting the application.
+## Usage
+
+1. **Access the Web Interface**: Open your browser and navigate to `http://localhost:8080`
+
+2. **Configure Scraping Parameters**:
+   - **URL**: Enter the starting URL to scrape (e.g., `https://example.com`)
+   - **Depth**: Set the maximum crawl depth (0 = only the starting page, 1 = starting page + one level of links, etc.)
+   - **Search String**: Enter the text to search for in link URLs
+
+3. **Start Scraping**: Click the "Start" button to begin the scraping process
+
+4. **View Results**: 
+   - Results appear in a table showing:
+     - Source URL (where the link was found)
+     - Matching link URL
+     - Depth at which the link was discovered
+   - Results are automatically saved to `results_log/YYYY-MM-DD_HH-MM-SS_scraper-result.txt`
 
 ## Project Structure
 
@@ -62,41 +84,50 @@ ScrapeHTTP is a web scraper application built with Go. It allows users to scrape
 scrapehttp/
 ├── cmd/
 │   └── scrapehttp/
-│       └── main.go
+│       └── main.go           # Application entry point
 ├── internal/
 │   ├── scraper/
-│   │   ├── scraper.go
-│   │   └── scraper_test.go
+│   │   ├── scraper.go        # Core scraping logic
+│   │   └── scraper_test.go   # Tests for scraper
 │   └── web/
-│       ├── handlers.go
-│       └── templates.go
+│       ├── handlers.go       # HTTP handlers
+│       └── templates.go      # Template rendering
 ├── static/
-│   └── styles.css
+│   └── styles.css            # CSS styling
 ├── templates/
-│   └── index.html
-├── go.mod
-├── go.sum
-└── .air.toml
+│   ├── header.html           # Page header template
+│   ├── footer.html           # Page footer template
+│   └── index.html            # Main page template
+├── results_log/              # Generated result files (created at runtime)
+├── go.mod                    # Go module definition
+└── README.md
 ```
 
-- **cmd/scrapehttp/main.go**: The main entry point of the application.
-- **internal/scraper/**: Contains the scraping logic.
-- **internal/web/**: Contains the HTTP handlers and template rendering logic.
-- **static/**: Contains static files like CSS.
-- **templates/**: Contains HTML templates.
-- **go.mod**: Go module file.
-- **go.sum**: Go dependencies file.
-- **.air.toml**: Configuration file for `air`.
+## How It Works
 
-## Usage
+1. **Input Processing**: The web form captures the URL, depth, and search string
+2. **Recursive Crawling**: The scraper visits the starting URL and recursively follows links within the same domain
+3. **Filtering**: Links are filtered to:
+   - Stay within the same domain
+   - Match the search string
+   - Exclude mailto, tel, and javascript links
+4. **Result Display**: Matching links are displayed with their source URL and depth
+5. **Persistence**: Results are saved to timestamped files, with automatic cleanup to keep only the 5 most recent files
 
-1. Open your web browser and navigate to `http://localhost:8080`.
-2. Enter the URL, depth, and search string in the form.
-3. Click the "Start Scrape" button to start the scraping process.
-4. The results will be displayed on the page and saved to a file with a timestamped filename.
+## Running Tests
+
+To run the tests for the scraper module:
+
+```sh
+go test ./internal/scraper/...
+```
+
+To run all tests with verbose output:
+
+```sh
+go test -v ./...
+```
 
 ## License
 
 This project is licensed under the MIT License.
-
-Replace `https://github.com/yourusername/scrapehttp.git` with the actual URL of your GitHub repository. This `README.md` file provides all the necessary instructions for someone new to the project to get started, including how to install dependencies and start the development server.Replace `https://github.com/yourusername/scrapehttp.git` with the actual URL of your GitHub repository. This `README.md` file provides all the necessary instructions for someone new to the project to get started, including how to install dependencies and start the development server.

@@ -1,16 +1,31 @@
+/* Hairyables*/
+:root {
+    --mid-grey: #808080;
+    --dark-grey: #2a2a2a;
+    --light-grey: #e8e8e8;
+    --off-white: #f5f5f5;
+    --high-contrast-black: #1a1a1a;
+    --silver: #c0c0c0;
+}
+/* death hairyables*/
+
 html {
     font-size: 16px;
-    color: silver;
+    color: var(--off-white);
+    margin: 0 auto;
 }
 
 body {
-    background-color: #3f0000;
+    background-color: var(--dark-grey);
     margin: 0; 
     padding: 0;
 }
 
 header {
-    border-bottom: #e1c4ff 3px solid;
+    border-bottom: var(--mid-grey) 3px solid;
+    h1 {
+        padding-left: 2rem;
+    }
 }
 
 header nav {
@@ -18,7 +33,7 @@ header nav {
 }
 header nav ul {
     display: flex;
-    justify-content: center;
+    justify-content: start;
     list-style-type: none;
     padding: 0;
     margin: 0;
@@ -26,12 +41,12 @@ header nav ul {
         margin: 0 1rem;
         a {
             text-decoration: none;
-            color: silver;
-            border: #f2f2f2 1px solid;
+            color: var(--silver);
+            border: var(--mid-grey) 1px solid;
             padding: 0.5rem;
             border-radius: 8px;
             &:hover {
-                color: white;
+                color: var(--off-white);
             }
         }
     }
@@ -43,9 +58,9 @@ section, header, footer {
 
 section#page-content {
     display: flex;
+    flex-direction: column-reverse; /* never fix html layout! */
     justify-content: center;
     padding-bottom: 3rem;
-    justify-items: center;
     gap: 10%;
     margin-top: 2em;
 }
@@ -53,30 +68,29 @@ section#page-content {
 article#user-form {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     padding: 2rem;
-    background-color: lightpink;
+    background-color: var(--dark-grey);
     margin-right: 1rem;
 }
 
 article#instructions {
     flex: 1;
-    padding: 2rem;
-    background-color: #f2f2f2;
+    padding: 1.275rem;
+    background-color: var(--high-contrast-black);
     margin-left: 1rem;
+    max-width: fit-content;
 }
 
-#user-form, #instructions {
+#instructions {
     border-radius: 20px;
     height: fit-content;
-    max-width: 20vw;;
 }
 
 #scrape-form {
     display: flex;
     flex-direction: column;
-    max-width: 500px;
-    color: #3f0000;
+    color: var(--off-white);
 }
 
 #scrape-form div {
@@ -89,16 +103,22 @@ article#instructions {
     margin-bottom: 0.5rem;
     min-width: 9rem;
 }
-
+    
 #scrape-form input {
     margin-bottom: 1rem;
     padding: 0.5rem;
+    &#url {
+        min-width: 40vw;
+    }
+    &#search-string {
+        min-width: 20vw;
+    }
 }
 
 button {
-    padding: 0.5rem;
+    padding: 0.75rem;
     background-color: lightblue;
-    border: 1px solid blueviolet;
+    border: 1px solid var(--off-white);
     border-radius: 8px;
     cursor: pointer;
     width: fit-content;
@@ -107,7 +127,11 @@ button {
 }
 
 #scrape-button {
-    align-self: flex-end;
+    align-self: flex-start;
+}
+
+#results {
+    min-height: 300px;;
 }
 
 table {
@@ -116,14 +140,15 @@ table {
 }
 
 table, th, td {
-    border: 1px solid #3f0000;
+    border: var(--high-contrast-black)1px solid;
+    color: var(--high-contrast-black);
 }
 
 th {
     text-align: left;
     padding: 0.5rem;
-    border-bottom: 3px solid #3f0000;
-    color: #3f0000;
+    border-bottom: 3px solid var(--high-contrast-black);
+    color: var(--mid-grey);
 }
 
 td {
@@ -140,11 +165,11 @@ tr:nth-child(odd) {
 
 /* footer */
 footer {
-    background-color: #e1c4ff;
+    background-color: var(--mid-grey);
     text-align: center;
     padding: 1rem;
     position: fixed;
     bottom: 0;
     width: 100%;
-    color: #3f0000;
+    color: var(--off-white);
 }

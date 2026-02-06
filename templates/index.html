@@ -12,27 +12,39 @@
         <article id="user-form">
             <form id="scrape-form">
                 <div>
+                    <label>Mode:</label>
+                    <label>
+                        <input type="radio" name="mode" value="search" checked>
+                        Search
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" value="dead">
+                        Dead links
+                    </label>
+                </div>
+                <div>
                     <label for="url">URL:</label>
-                    <input type="text" id="url" name="url" required>
+                    <input type="text" id="url" name="url" value="https://" required>
                 </div>
                 <div>
                     <label for="depth">Depth:</label>
-                    <input type="number" id="depth" name="depth" min="0" required>
+                    <input type="number" id="depth" name="depth" min="0" value="1" required>
                 </div>
                 <div>
                     <label for="search-string">Search String:</label>
-                    <input type="text" id="search-string" name="searchString" required>
+                    <input type="text" id="search-string" name="searchString" placeholder="your search text" required>
                 </div>
-                <button type="button" id="scrape-button">Start</button>
+                <button type="button" id="scrape-button">Start scraping</button>
             </form>
         </article>
         <article id="instructions">
             <p>How to use this tool:</p>
             <ul>
-                <li>Enter the URL you want to scrape.</li>
-                <li>Specify the depth of the scrape.</li>
-                <li>Enter the search string you are looking for.</li>
-                <li>Click the "Start" button to begin scraping.</li>
+                <li>Choose search mode or dead-link mode.</li>
+                <li>Enter the URL you want to crawl.</li>
+                <li>Specify the depth of the crawl.</li>
+                <li>Enter a search string for search mode.</li>
+                <li>Click the "Start" button to begin.</li>
             </ul>
         </article>
     </section>
@@ -44,42 +56,96 @@
     {{template "footer.html"}}
 
     <script>
+        const searchInput = document.getElementById('search-string');
+        const modeInputs = document.querySelectorAll('input[name="mode"]');
+
+        const updateMode = () => {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            const isSearch = mode === 'search';
+            searchInput.required = isSearch;
+            searchInput.disabled = !isSearch;
+            searchInput.placeholder = isSearch ? 'your search text' : 'not used in dead-link mode';
+        };
+
+        modeInputs.forEach(input => input.addEventListener('change', updateMode));
+        updateMode();
+
         document.getElementById('scrape-button').addEventListener('click', function() {
             const formData = new FormData(document.getElementById('scrape-form'));
-            document.getElementById('loading').style.display = 'block';
+            const loadingEl = document.getElementById('loading');
+            loadingEl.style.display = 'block';
             fetch('/scrape', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(async response => {
+                const contentType = response.headers.get('content-type') || '';
+                if (!response.ok || !contentType.includes('application/json')) {
+                    const message = await response.text();
+                    return { error: message || 'Invalid response from server.' };
+                }
+                return response.json();
+            })
             .then(data => {
-                document.getElementById('loading').style.display = 'none';
+                loadingEl.style.display = 'none';
                 const resultsDiv = document.getElementById('results');
-                resultsDiv.innerHTML = `
-                    <h2>Scraped Links</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Source URL</th>
-                                <th>Search result</th>
-                                <th>Depth</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.links.map(link => `
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p>${data.error}</p>`;
+                    return;
+                }
+                if (data.mode === 'dead') {
+                    const hasResults = Array.isArray(data.dead_results) && data.dead_results.length > 0;
+                    resultsDiv.innerHTML = `
+                        <h2>Dead Link Results</h2>
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td><a href="${link.source_url}">${link.source_url}</a></td>
-                                    <td><a href="${link.url}">${link.text}</a></td>
-                                    <td>${link.depth}</td>
+                                    <th>Source URL</th>
+                                    <th>Broken URL</th>
+                                    <th>Depth</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
+                            </thead>
+                            <tbody>
+                                ${hasResults ? data.dead_results.map(link => `
+                                    <tr>
+                                        <td><a href="${link.source_url}">${link.source_url}</a></td>
+                                        <td><a href="${link.broken_url}">${link.broken_url}</a></td>
+                                        <td>${link.depth}</td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="3">No results match the query.</td></tr>'}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    const hasResults = Array.isArray(data.search_results) && data.search_results.length > 0;
+                    resultsDiv.innerHTML = `
+                        <h2>Search Results</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Page URL</th>
+                                    <th>Match Text</th>
+                                    <th>Depth</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${hasResults ? data.search_results.map(result => `
+                                    <tr>
+                                        <td><a href="${result.page_url}">${result.page_url}</a></td>
+                                        <td>${result.match_text}</td>
+                                        <td>${result.depth}</td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="3">No results match the query.</td></tr>'}
+                            </tbody>
+                        </table>
+                    `;
+                }
             })
             .catch(error => {
-                document.getElementById('loading').style.display = 'none';
+                loadingEl.style.display = 'none';
                 console.error('Error:', error);
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '<p>Something went wrong. Please check your input and try again.</p>';
             });
         });
     </script>

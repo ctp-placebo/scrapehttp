@@ -14,14 +14,22 @@ import (
 
 // RenderTemplate function is declared in templates.go
 type PageData struct {
-	Links []LinkData `json:"links"`
+	Mode          string             `json:"mode"`
+	SearchResults []SearchResultData `json:"search_results"`
+	DeadResults   []DeadLinkData     `json:"dead_results"`
 }
 
-type LinkData struct {
-	URL       string `json:"url"`
-	Text      string `json:"text"`
-	SourceURL string `json:"source_url"`
+type SearchResultData struct {
+	PageURL   string `json:"page_url"`
+	MatchText string `json:"match_text"`
 	Depth     int    `json:"depth"`
+}
+
+type DeadLinkData struct {
+	SourceURL string `json:"source_url"`
+	BrokenURL string `json:"broken_url"`
+	Depth     int    `json:"depth"`
+	Status    int    `json:"status"`
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -45,18 +53,41 @@ func ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	searchString := r.FormValue("searchString")
-
-	httpLinks := scraper.ScrapeLinks(baseURL, searchString, maxDepth)
-
-	links := make([]LinkData, 0, len(httpLinks))
-	for link, data := range httpLinks {
-		links = append(links, LinkData{URL: link, Text: link, SourceURL: data.SourceURL, Depth: data.Depth})
+	mode := r.FormValue("mode")
+	if mode != "dead" {
+		mode = "search"
 	}
 
-	// Return the links as a JSON response
+	searchString := r.FormValue("searchString")
+
+	var searchResults []SearchResultData
+	var deadResults []DeadLinkData
+
+	if mode == "dead" {
+		results := scraper.ScrapeDeadLinks(baseURL, maxDepth)
+		deadResults = make([]DeadLinkData, 0, len(results))
+		for _, result := range results {
+			deadResults = append(deadResults, DeadLinkData{
+				SourceURL: result.SourceURL,
+				BrokenURL: result.LinkURL,
+				Depth:     result.Depth,
+				Status:    result.Status,
+			})
+		}
+	} else {
+		results := scraper.ScrapeSearch(baseURL, searchString, maxDepth)
+		searchResults = make([]SearchResultData, 0, len(results))
+		for _, result := range results {
+			searchResults = append(searchResults, SearchResultData{
+				PageURL:   result.PageURL,
+				MatchText: result.MatchText,
+				Depth:     result.Depth,
+			})
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(PageData{Links: links})
+	json.NewEncoder(w).Encode(PageData{Mode: mode, SearchResults: searchResults, DeadResults: deadResults})
 
 	// Create the results_log directory if it doesn't exist
 	resultsDir := "results_log"
@@ -80,12 +111,21 @@ func ScrapeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// Write the results to the file
-	for _, link := range links {
-		_, err := file.WriteString(fmt.Sprintf("Found at: %s\nLink: %s\n", link.SourceURL, link.URL))
-		if err != nil {
-			fmt.Printf("Error writing to file: %v\n", err)
-			return
+	if mode == "dead" {
+		for _, link := range deadResults {
+			_, err := file.WriteString(fmt.Sprintf("Source: %s\nBroken: %s\nDepth: %d\nStatus: %d\n\n", link.SourceURL, link.BrokenURL, link.Depth, link.Status))
+			if err != nil {
+				fmt.Printf("Error writing to file: %v\n", err)
+				return
+			}
+		}
+	} else {
+		for _, link := range searchResults {
+			_, err := file.WriteString(fmt.Sprintf("Page: %s\nMatch: %s\nDepth: %d\n\n", link.PageURL, link.MatchText, link.Depth))
+			if err != nil {
+				fmt.Printf("Error writing to file: %v\n", err)
+				return
+			}
 		}
 	}
 
